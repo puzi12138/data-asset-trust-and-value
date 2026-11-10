@@ -1,0 +1,2 @@
+<script setup lang="ts">defineProps<{ loading?: boolean; error?: string; empty?: boolean }>(); defineEmits<{ retry: [] }>()</script>
+<template><div v-if="loading" class="state-box" role="status"><span class="spinner"/>正在读取真实 API 数据…</div><div v-else-if="error" class="state-box error" role="alert"><strong>请求未完成</strong><p>{{ error }}</p><button class="button secondary" @click="$emit('retry')">重试</button></div><div v-else-if="empty" class="state-box">暂无记录。请先登记资产或执行一次评估。</div><slot v-else/></template>

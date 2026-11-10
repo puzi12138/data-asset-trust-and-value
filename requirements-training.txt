@@ -1,0 +1,3 @@
+# Resource monitoring for the guarded worker; installing this does not start training.
+-r requirements.txt
+psutil==5.9.1
