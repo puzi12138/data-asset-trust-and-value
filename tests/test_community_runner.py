@@ -24,15 +24,23 @@ class RunnerValidationTests(TestCase):
         with self.assertRaises(ValueError):run_task.resolve_config('EXP-07',1103)
         with self.assertRaises(ValueError):run_task.resolve_config('EXP-01',7)
     def test_resource_guards_cannot_be_relaxed(self):
-        with self.assertRaisesRegex(ValueError,'RESOURCE_GUARD'):
-            resources.execute(CFG,FIXTURE,'unused',300,max_rss_gib=2.)
-        with self.assertRaisesRegex(ValueError,'RESOURCE_GUARD'):
-            resources.execute(CFG,FIXTURE,'unused',300,min_free_gib=.5)
+        # These assertions test numeric guards, independently of host gating.
+        # Replacing this module reference does not alter the host sys module.
+        with mock.patch.object(resources,'sys',mock.Mock(platform='win32')):
+            with self.assertRaisesRegex(ValueError,'RESOURCE_GUARD'):
+                resources.execute(CFG,FIXTURE,'unused',300,max_rss_gib=2.)
+            with self.assertRaisesRegex(ValueError,'RESOURCE_GUARD'):
+                resources.execute(CFG,FIXTURE,'unused',300,min_free_gib=.5)
     def test_resource_preflight_does_not_spawn(self):
-        with mock.patch.object(resources.psutil,'virtual_memory',return_value=mock.Mock(available=0)):
+        with mock.patch.object(resources,'sys',mock.Mock(platform='win32')),mock.patch.object(resources.psutil,'virtual_memory',return_value=mock.Mock(available=0)):
             with mock.patch.object(resources.subprocess,'Popen') as spawn:
                 x=resources.execute(CFG,FIXTURE,'unused',300,smoke=True)
         self.assertEqual(x['status'],'NOT_RUN_RESOURCE_PREFLIGHT');self.assertFalse(x['worker_started']);spawn.assert_not_called()
+    def test_platform_rejection_precedes_worker_creation(self):
+        for platform_name,reason in [('linux','LINUX_EXPERIMENTAL_REQUIRES_EXPLICIT_OPT_IN'),('darwin','UNSUPPORTED_RESOURCE_PLATFORM')]:
+            with self.subTest(platform=platform_name),mock.patch.object(resources,'sys',mock.Mock(platform=platform_name)),mock.patch.object(resources.subprocess,'Popen') as spawn:
+                with self.assertRaisesRegex(RuntimeError,reason):resources.execute(CFG,FIXTURE,'unused',300)
+                spawn.assert_not_called()
     def test_worker_direct_launch_fails_before_go(self):
         with tempfile.TemporaryDirectory(prefix='community_runner_') as d:
             out=Path(d)/'worker_output'
