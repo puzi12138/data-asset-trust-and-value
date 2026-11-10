@@ -25,6 +25,8 @@ data/assets/
 experiments/runs/
 reports/
 results/
+!experiments/community/results/
+!experiments/community/results/**
 review_packages/
 deliverables/
 grant_application/

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "community-run-manifest-1.0",
+  "title": "Community run manifest: data is not an attestation",
+  "type": "object",
+  "required": ["schema_version", "run_id", "task_id", "seed", "status", "created_utc", "config_sha256", "worker_sha256", "git_commit", "code", "infrastructure", "inputs", "files", "target_model", "primary_metric", "expected_methods"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,128}$"},
+    "task_id": {"enum": ["EXP-01", "EXP-02", "EXP-03", "EXP-04", "EXP-05", "EXP-06", "SMOKE-01"]},
+    "seed": {"enum": [1103, 2207, 3301]},
+    "status": {"enum": ["COMPLETE", "FAILED_WORKER_OR_RESOURCE", "FAILED_OUTPUT_CHECK", "NOT_RUN_PREFLIGHT_OR_BUDGET"]},
+    "config_sha256": {"$ref": "#/$defs/hash"},
+    "worker_sha256": {"$ref": "#/$defs/hash"},
+    "git_commit": {"type": "string", "pattern": "^([0-9a-f]{40}|UNKNOWN)$"},
+    "code": {"type": "array", "items": {"$ref": "#/$defs/digest"}},
+    "infrastructure": {"type": "array", "items": {"$ref": "#/$defs/digest"}},
+    "inputs": {"type": "array", "items": {"$ref": "#/$defs/digest"}},
+    "files": {"type": "array", "maxItems": 500, "items": {"allOf": [{"$ref": "#/$defs/digest"}, {"required": ["size_bytes"], "properties": {"size_bytes": {"type": "integer", "minimum": 0}}}]}},
+    "target_model": {"enum": ["LogisticRegression", "Ridge"]},
+    "primary_metric": {"enum": ["LogLoss", "MAE"]},
+    "expected_methods": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "digest": {"type": "object", "required": ["path", "sha256"], "properties": {"path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/hash"}}}
+  }
+}
