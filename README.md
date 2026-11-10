@@ -86,20 +86,23 @@ pnpm build
 
 安装独立的CPU实验依赖后，可先准备数据并检查，再执行一个种子：
 
-```sh
-python -m pip install -r requirements-experiments.txt
-python scripts/experiments/check_env.py
-python scripts/experiments/prepare_data.py --task-id EXP-03 --seed 1103 --output ../community-data
-python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu --dry-run
-python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu
+```powershell
+py -3.10 -m venv .venv
+$Python = (Resolve-Path .venv\Scripts\python.exe).Path
+& $Python -m pip install -r requirements-experiments.txt
+& $Python scripts/experiments/check_env.py
+& $Python scripts/experiments/prepare_data.py --task-id EXP-03 --seed 1103 --output ../community-data
+& $Python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu --dry-run
+# 仅在上一步返回 DRY_RUN_READY、退出码为0后执行：
+& $Python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu
 ```
 
 运行目录具有唯一run_id。提交前使用可信版本的检查器复算：
 
-```sh
-python scripts/experiments/verify_result.py --result path/to/run-directory --data-root ../community-data --output ../verification-report.json
+```powershell
+& $Python scripts/experiments/verify_result.py --result path/to/run-directory --data-root ../community-data --output ../verification-report.json
 ```
 
-CPU工作进程默认串行，正式任务要求启动可用内存至少1.5 GiB，并有运行时内存与时间限制；GPU不需要。Windows与Linux采用不同资源保护实现；Linux为未实测实验性支持，macOS尚不开放正式训练。平台状态与实际验证范围见[运行手册](docs/EXPERIMENT_RUNBOOK.md)。
+当前贡献者实验与CI只面向Windows 10/11 64位。使用PowerShell、Python 3.10和Git，按[Windows逐步运行手册](docs/EXPERIMENT_RUNBOOK.md)操作；每个实验Issue也包含完整步骤。CPU工作进程默认串行，正式任务要求启动可用内存至少1.5 GiB，建议预留4 GiB；GPU不需要。Linux和macOS暂不列入本轮执行与验收范围，历史实现保留。
 
 结果采用JSON/CSV和可复算的线性模型参数，不使用pickle。数值复算通过为REPRODUCED，科学验收仍需维护者独立复核。失败、超时和负结果都应保留。贡献者无需获得本地完整项目、个人资料或任何内部凭据。大结果不直接进入main，保存与提交方式见[RESULT_SUBMISSION](docs/RESULT_SUBMISSION.md)。

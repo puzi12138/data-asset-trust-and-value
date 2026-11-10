@@ -2,7 +2,7 @@
 
 - Task ID and seeds:
 - Run ID, commit and whether this is a first run or repeat:
-- Environment summary:
+- Windows 10/11 64-bit, Python 3.10 and CPU/memory summary:
 - Frozen protocol changed? If yes, explain and propose a new version:
 - Success, failed and unrun arms:
 - Result location, SHA-256 and retention plan:

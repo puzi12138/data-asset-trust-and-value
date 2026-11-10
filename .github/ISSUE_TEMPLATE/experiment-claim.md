@@ -12,9 +12,11 @@ title: "[Experiment] "
 
 ## Planned environment
 
-- Operating system and Python version:
+- Windows 10/11 64-bit and Python 3.10 version:
 - CPU and available memory (approximate):
 - Expected execution window:
 - Protocol changes: none / separately proposed (describe)
 
 Please do not post personal contacts, private data, credentials or internal materials. Wait for the maintainer to coordinate the claim before starting.
+
+Current contributor tasks are Windows-only. Follow the complete PowerShell steps in the selected experiment Issue or `docs/EXPERIMENT_RUNBOOK.md`; Linux and macOS runs are outside the current task scope.

@@ -11,13 +11,13 @@ This repository does not redistribute source data. The preparation script downlo
 | EXP-05 | [Ionosphere](https://archive.ics.uci.edu/dataset/52/ionosphere) | 351 | 34 | Class; classification | 29,983 |
 | EXP-06 | [Airfoil Self-Noise](https://archive.ics.uci.edu/dataset/291/airfoil+self+noise) | 1,503 | 5 | Sound pressure; regression | 60,126 |
 
-Example, after installing pinned dependencies, with `DATA_DIR` an absolute directory outside this repository:
+Current contributor tasks are Windows-only. Example from PowerShell, after following the virtual-environment setup in `docs/EXPERIMENT_RUNBOOK.md`:
 
-```sh
-python scripts/experiments/prepare_data.py --task-id EXP-03 --seed 1103 --output /absolute/path/to/data
+```powershell
+& .\.venv\Scripts\python.exe scripts/experiments/prepare_data.py --task-id EXP-03 --seed 1103 --output ..\community-data
 ```
 
-For Windows PowerShell, use a path such as `C:/experiment-data` in place of `/absolute/path/to/data`. Run with `--dry-run` to inspect the source and output path without network access or writes. An existing verified local archive can be used with `--cache /absolute/cache`, where the filename is `<dataset>.zip` as named in `SOURCES.json`. The script refuses an existing task/seed output directory; choose a new output root or preserve and inspect the old directory before continuing. The downloaded archive is not automatically kept as part of the result.
+Run with `--dry-run` to inspect the source and output path without network access or writes. An existing verified local archive can be used with `--cache C:/experiment-cache`, where the filename is `<dataset>.zip` as named in `SOURCES.json`. The script refuses an existing task/seed output directory: preserve it and use the run task's `--dry-run` to verify its pinned inputs before reusing it; do not overwrite it or substitute a different upstream source. The downloaded archive is not automatically kept as part of the result. Data roots and result roots stay outside the repository.
 
 Every archive is limited to 1 MB, every consumed member to 5 MB, and the SHA-256 must match the pin. A mismatch fails closed, including if the upstream publisher updates a file. Do not replace the pinned source or modify the role split: a changed source needs a separately reviewed protocol version.
 

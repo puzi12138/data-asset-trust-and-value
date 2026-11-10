@@ -11,12 +11,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   software-tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
     env:
       OMP_NUM_THREADS: '2'
       OPENBLAS_NUM_THREADS: '2'
@@ -36,7 +32,7 @@ jobs:
         run: python scripts/experiments/check_env.py
   submitted-results:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -52,15 +48,19 @@ jobs:
         with:
           python-version: '3.10'
       - name: Use only the trusted base verifier
-        shell: bash
+        shell: pwsh
         run: |
-          if [ -d candidate/experiments/community/results/submissions ] || [ -d trusted/experiments/community/results/submissions ]; then
-            test -f trusted/scripts/experiments/check_submissions.py
+          if ((Test-Path 'candidate/experiments/community/results/submissions') -or (Test-Path 'trusted/experiments/community/results/submissions')) {
+            if (-not (Test-Path 'trusted/scripts/experiments/check_submissions.py')) {
+              throw 'The trusted base branch does not yet contain the result verifier.'
+            }
             python -m pip install --disable-pip-version-check -r trusted/requirements-experiments.txt
-            python -B trusted/scripts/experiments/check_submissions.py --candidate candidate --baseline trusted --data-root "$RUNNER_TEMP/community-data" --output "$RUNNER_TEMP/result-checks"
-          else
-            echo "NO_SUBMISSIONS: no scientific result acceptance was performed."
-          fi
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            python -B trusted/scripts/experiments/check_submissions.py --candidate candidate --baseline trusted --data-root "$env:RUNNER_TEMP/community-data" --output "$env:RUNNER_TEMP/result-checks"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } else {
+            Write-Output 'NO_SUBMISSIONS: no scientific result acceptance was performed.'
+          }
       - name: Retain consistency reports only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
