@@ -1,0 +1,8 @@
+# CPU-only reproducibility environment, tested with Python 3.10.
+# No language-model weights or GPU runtime are downloaded by these commands.
+numpy==1.24.3
+scipy==1.13.0
+scikit-learn==1.4.2
+threadpoolctl==3.4.0
+psutil==5.9.1
+xlrd==2.0.1

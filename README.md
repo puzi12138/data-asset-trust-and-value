@@ -77,3 +77,32 @@ pnpm build
 协议标识、字段名、签名与摘要绑定精确版本。外部已有收据需要按当前接口重新建立，不能仅替换文本后当作已验证材料。
 
 第三方依赖由包管理器获取，并遵守各自许可；不随仓库复制依赖目录。
+
+## 贡献计算资源
+
+社区实验扩展当前为待公开审批的本地候选。代码许可证、机构及知识产权范围尚待权利人确认；公开仓库可见不代表已经取得这些授权。发布边界见[PUBLICATION_BOUNDARY](docs/PUBLICATION_BOUNDARY.md)。
+
+首批任务包括Spambase、Concrete、Wine、Auto MPG、Ionosphere和Airfoil Self-Noise，每项固定三个种子。分类使用Logistic Regression、回归使用Ridge，保留同信息RF等选择对照；回归还包含条件Monte Carlo Data Shapley。任务使用公开评价数据，不宣称隐藏盲测。见[任务矩阵](docs/EXPERIMENT_TASK_MATRIX.md)和[贡献说明](CONTRIBUTING.md)。
+
+安装独立的CPU实验依赖后，可先准备数据并检查，再执行一个种子：
+
+```powershell
+py -3.10 -m venv .venv
+$Python = (Resolve-Path .venv\Scripts\python.exe).Path
+& $Python -m pip install -r requirements-experiments.txt
+& $Python scripts/experiments/check_env.py
+& $Python scripts/experiments/prepare_data.py --task-id EXP-03 --seed 1103 --output ../community-data
+& $Python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu --dry-run
+# 仅在上一步返回 DRY_RUN_READY、退出码为0后执行：
+& $Python scripts/experiments/run_task.py --task-id EXP-03 --seed 1103 --data-dir ../community-data --output ../community-results --max-workers 1 --timeout 300 --device cpu
+```
+
+运行目录具有唯一run_id。提交前使用可信版本的检查器复算：
+
+```powershell
+& $Python scripts/experiments/verify_result.py --result path/to/run-directory --data-root ../community-data --output ../verification-report.json
+```
+
+当前贡献者实验与CI只面向Windows 10/11 64位。使用PowerShell、Python 3.10和Git，按[Windows逐步运行手册](docs/EXPERIMENT_RUNBOOK.md)操作；每个实验Issue也包含完整步骤。CPU工作进程默认串行，正式任务要求启动可用内存至少1.5 GiB，建议预留4 GiB；GPU不需要。Linux和macOS暂不列入本轮执行与验收范围，历史实现保留。
+
+结果采用JSON/CSV和可复算的线性模型参数，不使用pickle。数值复算通过为REPRODUCED，科学验收仍需维护者独立复核。失败、超时和负结果都应保留。贡献者无需获得本地完整项目、个人资料或任何内部凭据。大结果不直接进入main，保存与提交方式见[RESULT_SUBMISSION](docs/RESULT_SUBMISSION.md)。

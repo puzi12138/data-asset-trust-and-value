@@ -1,0 +1,6 @@
+# Deterministic source bytes on Windows and POSIX checkouts.
+*.py text eol=lf
+# Hash-bound serialized inputs and submitted results must retain exact bytes.
+experiments/community/configs/** -text
+tests/fixtures/community_smoke/** -text
+experiments/community/results/submissions/** -text
