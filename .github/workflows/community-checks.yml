@@ -54,10 +54,10 @@ jobs:
       - name: Use only the trusted base verifier
         shell: bash
         run: |
-          if [ -d candidate/experiments/community/results/submissions ]; then
+          if [ -d candidate/experiments/community/results/submissions ] || [ -d trusted/experiments/community/results/submissions ]; then
             test -f trusted/scripts/experiments/check_submissions.py
             python -m pip install --disable-pip-version-check -r trusted/requirements-experiments.txt
-            python -B trusted/scripts/experiments/check_submissions.py --candidate candidate --data-root "$RUNNER_TEMP/community-data" --output "$RUNNER_TEMP/result-checks"
+            python -B trusted/scripts/experiments/check_submissions.py --candidate candidate --baseline trusted --data-root "$RUNNER_TEMP/community-data" --output "$RUNNER_TEMP/result-checks"
           else
             echo "NO_SUBMISSIONS: no scientific result acceptance was performed."
           fi

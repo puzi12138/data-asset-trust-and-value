@@ -9,7 +9,7 @@
     "run_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,128}$"},
     "task_id": {"enum": ["EXP-01", "EXP-02", "EXP-03", "EXP-04", "EXP-05", "EXP-06", "SMOKE-01"]},
     "seed": {"enum": [1103, 2207, 3301]},
-    "status": {"enum": ["COMPLETE", "FAILED_WORKER_OR_RESOURCE", "FAILED_OUTPUT_CHECK", "NOT_RUN_PREFLIGHT_OR_BUDGET"]},
+    "status": {"enum": ["COMPLETE", "FAILED_WORKER_OR_RESOURCE", "FAILED_OUTPUT_CHECK", "FAILED_SUPERVISOR", "NOT_RUN_PREFLIGHT_OR_BUDGET", "NOT_RUN_INVALID_INPUT", "NOT_RUN_RESOURCE_PREFLIGHT", "NOT_RUN_DEPENDENCY_PREFLIGHT"]},
     "config_sha256": {"$ref": "#/$defs/hash"},
     "worker_sha256": {"$ref": "#/$defs/hash"},
     "git_commit": {"type": "string", "pattern": "^([0-9a-f]{40}|UNKNOWN)$"},
