@@ -1,0 +1,6 @@
+# Letter/shared classification runner only. No spreadsheet adapter or model download.
+numpy==1.24.3
+scipy==1.13.0
+scikit-learn==1.4.2
+threadpoolctl==3.4.0
+psutil==5.9.1
