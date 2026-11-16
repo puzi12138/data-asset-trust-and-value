@@ -2,7 +2,7 @@
 
 This branch adds an isolated runner for the existing EXT tasks. Historical EXP inputs, code and results remain unchanged. The current runnable adapter is **EXT-02 Letter Recognition**. Covertype, Superconductivity and Bike Sharing still require tested adapters and, for regression, target-model/metric extensions. Do not pass unsupported IDs to this command.
 
-Windows10/11 x64, Python3.10 x64, CPU only. No GPU/model downloads. UCI Letter Recognition (Frey & Slate,1991), DOI10.24432/C5ZP40, CC BY4.0. The official archive is approximately0.37MiB; raw CSV approximately0.68MiB. Results contain JSON tree models and full predictions, so reserve1GiB disk. Runtime is subject to actual memory/CPU competition.
+Windows10/11 x64, Python3.10 x64, CPU only. No GPU/model downloads. UCI Letter Recognition (Slate,1991), DOI10.24432/C5ZP40, CC BY4.0. The official archive is approximately0.37MiB; raw CSV approximately0.68MiB. Results contain JSON tree models and full predictions, so reserve1GiB disk. Runtime is subject to actual memory/CPU competition.
 
 ## Work ownership
 

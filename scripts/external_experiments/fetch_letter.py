@@ -53,7 +53,7 @@ def main():
     write(out / 'source.json', {
         'dataset': 'Letter Recognition', 'source_url': PAGE, 'download_url': DOWNLOAD,
         'license': 'CC BY 4.0', 'license_url': PAGE,
-        'attribution': 'Frey, P. & Slate, D. (1991). Letter Recognition. UCI Machine Learning Repository. DOI: 10.24432/C5ZP40.',
+        'attribution': 'Slate, D. (1991). Letter Recognition [Dataset]. UCI Machine Learning Repository. DOI: 10.24432/C5ZP40.',
         'retrieved_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         'raw_sha256': sha(raw), 'raw_size_bytes': raw.stat().st_size,
         'archive_sha256': sha(archive), 'archive_size_bytes': len(blob),
