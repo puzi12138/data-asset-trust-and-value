@@ -1,12 +1,12 @@
 # External experiments: shared supervised runner and Letter pilot
 
-This branch adds an isolated runner for the existing EXT tasks. Historical EXP inputs, code and results remain unchanged. The current runnable adapter is **EXT-02 Letter Recognition**. Covertype, Superconductivity and Bike Sharing still require tested adapters and, for regression, target-model/metric extensions. Do not pass unsupported IDs to this command.
+This branch adds an isolated runner for the existing EXT tasks. Historical EXP inputs, code and results remain unchanged. The current runnable real-data adapter is **EXT-02 Letter Recognition**. The shared regression runner now supports Ridge/RandomForestRegressor and MAE/RMSE/R², with a supervised synthetic check completed. Covertype, Superconductivity and Bike Sharing still require their tested real-data adapters. See the [regression guide](REGRESSION_ENGINE_GUIDE.md) for exact input contracts and commands.
 
 Windows10/11 x64, Python3.10 x64, CPU only. No GPU/model downloads. UCI Letter Recognition (Slate,1991), DOI10.24432/C5ZP40, CC BY4.0. The official archive is approximately0.37MiB; raw CSV approximately0.68MiB. Results contain JSON tree models and full predictions, so reserve1GiB disk. Runtime is subject to actual memory/CPU competition.
 
 ## Work ownership
 
-EXT-01 (#14) coordinates shared-runner changes; the maintainer supplies this initial candidate. EXT-02 (#15) owns Letter adapter/independent machine reproduction; EXT-03/#16 and EXT-04/#17 keep their own adapters. One owner per shared file. Existing Issue updates are not new tasks. Claim work and inspect current PR/revision first; do not duplicate an in-progress adapter or edit frozen old results.
+The maintainer supplies and integrates shared-runner changes. EXT-01 (#14) owns Covertype input preparation and classification-specific support; EXT-02 (#15) runs the remaining Letter seeds; EXT-03/#16 and EXT-04/#17 own their real regression adapters. Input work can proceed independently. One owner per shared file. Existing Issue updates are not new tasks. Claim work and inspect current PR/revision first; do not duplicate an in-progress adapter or edit frozen old results.
 
 ## Preparation
 
@@ -72,4 +72,4 @@ Verifier uses the standard library and trusted checkout arithmetic. It reconstru
 
 Submit code revision, source/license record, prepared inputs/member hashes, CODE_FREEZE, all planned arms, every prediction, model JSON, costs, supervisor/manifests and verification. Use relative slash ZIP member names and a full64-character SHA-256. Exclude virtual environments, tokens, account names, private paths and unrelated files. Raw small UCI data may be provided with attribution; avoid nesting duplicate archives.
 
-Covertype needs54-feature streaming/group preparation and7-class validation. Regression tasks need Ridge/RandomForestRegressor serialization and MAE/RMSE/R² independent replay, plus their specific group/time isolation. Extend in separate files/tests and freeze new implementations; this candidate does not yet implement those tasks.
+Covertype needs54-feature streaming/group preparation and7-class validation. Regression model serialization, numerical checking and the common material/date input contracts are implemented; the real Superconductivity and Bike adapters remain contributor work. Follow #16/#17 and the regression guide, develop in separate files/tests, and freeze tested inputs before running real experiments. The synthetic check is an engineering result, not evidence of real-data utility.
