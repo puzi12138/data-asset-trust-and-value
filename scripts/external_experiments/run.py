@@ -102,7 +102,7 @@ def main():
             budget.reserve(); reserved = True
             # Existing resource implementation remains byte-for-byte unchanged.
             # One process invocation owns this binding; no concurrent worker calls.
-            resources.WORKER = ROOT / 'scripts/external_experiments/worker.py'
+            resources.WORKER = ROOT / ('scripts/external_experiments/regression_worker.py' if cfg['task_type']=='regression' else 'scripts/external_experiments/worker.py')
             result = resources.execute(a.config.resolve(), a.data_dir.resolve(), out / 'worker_output',
                                        a.timeout, False, False,
                                        lambda: check_freeze(a.freeze, a.config, a.data_dir), 1.5, .75)
@@ -130,7 +130,8 @@ def main():
     write(out / 'PLAN_STATUS.json', plan)
     verification = {'status': 'NOT_RUN_INCOMPLETE_WORKER'}
     if result['status'] == 'COMPLETE' and (worker / 'SUMMARY.json').is_file():
-        p = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/external_experiments/verify.py'),
+        verifier = 'regression_verify.py' if cfg['task_type']=='regression' else 'verify.py'
+        p = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/external_experiments' / verifier),
                             '--result', str(worker), '--config', str(a.config), '--data-dir', str(a.data_dir),
                             '--output', str(out / 'VERIFY_REPORT.json')], cwd=ROOT,
                            capture_output=True, text=True, encoding='utf8', timeout=180)

@@ -48,7 +48,8 @@ class ExternalBindingTests(unittest.TestCase):
             common.validate_config(self.cfg, self.root)
 
     def test_unimplemented_task_is_not_silently_accepted(self):
-        self.cfg['task_id'] = 'EXT-04'
+        # EXT-04 now has a regression candidate; an unknown ID must still fail closed.
+        self.cfg['task_id'] = 'EXT-99'
         with self.assertRaisesRegex(ValueError, 'ADAPTER_NOT_IMPLEMENTED'):
             common.validate_config(self.cfg, self.root)
 

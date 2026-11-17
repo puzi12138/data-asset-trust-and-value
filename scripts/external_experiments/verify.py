@@ -259,7 +259,8 @@ def _verify_selections(result, cfg, data, refs, selections):
     n = min(len(d0), round(len(d0)*256/len(pool))); rng = random.Random(cfg['seed']+180000)
     wanted = {kind:rng.sample(range(len(d0)),n) for kind in ('source','label_changed','feature_changed')}
     require(detector['calibration_sample_indices'] == wanted, 'Detector calibration sample')
-    xs = [number(rows[i]['x'][0]) for i in d0 if rows[i]['x'][0] is not None]
+    mutation_column = cfg.get('mutation_feature_index', 0)
+    xs = [number(rows[i]['x'][mutation_column]) for i in d0 if rows[i]['x'][mutation_column] is not None]
     require(bool(xs), 'No D0 mutation feature')
     close(detector['calibration_mutation_feature_upper'],max(xs)+3*(statistics.pstdev(xs) or 1.),'Detector mutation threshold')
     scores = {}

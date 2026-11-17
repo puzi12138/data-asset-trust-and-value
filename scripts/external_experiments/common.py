@@ -52,16 +52,26 @@ def safe(root, relative):
 def validate_config(config, data_dir):
     if config.get('schema') != 'external-experiment-v1':
         raise ValueError('UNSUPPORTED_CONFIG_SCHEMA')
-    if config.get('task_id') not in {'EXT-02', 'EXTERNAL-SMOKE'}:
+    if config.get('task_id') not in {'EXT-02', 'EXTERNAL-SMOKE', 'EXT-03', 'EXT-04', 'REGRESSION-SMOKE'}:
         raise ValueError('ADAPTER_NOT_IMPLEMENTED')
     if config.get('task_id') == 'EXTERNAL-SMOKE' and config.get('scope') != 'SYNTHETIC_SMOKE_NON_SCIENTIFIC':
         raise ValueError('SMOKE_SCOPE_REQUIRED')
     if config.get('seed') not in SEEDS or isinstance(config.get('seed'), bool):
         raise ValueError('SEED_NOT_FROZEN')
-    if config.get('budgets') != [128, 512] or config.get('models') != ['logistic', 'random_forest']:
+    classification = config.get('task_id') in {'EXT-02', 'EXTERNAL-SMOKE'}
+    if config.get('task_id') == 'REGRESSION-SMOKE' and config.get('scope') != 'SYNTHETIC_SMOKE_NON_SCIENTIFIC':
+        raise ValueError('SMOKE_SCOPE_REQUIRED')
+    wanted_models = ['logistic', 'random_forest'] if classification else ['ridge', 'random_forest']
+    if config.get('budgets') != [128, 512] or config.get('models') != wanted_models:
         raise ValueError('MATRIX_NOT_FROZEN')
-    if config.get('task_type') != 'classification' or config.get('mutation_feature_index') != 0:
+    expected = {'EXT-03': (81, 0, 'Superconductivity'), 'EXT-04': (12, 8, 'Bike Sharing'),
+                'REGRESSION-SMOKE': (12, 8, 'Synthetic Regression')}
+    if classification and (config.get('task_type') != 'classification' or config.get('mutation_feature_index') != 0):
         raise ValueError('UNSUPPORTED_TASK_OR_FEATURE')
+    if not classification:
+        dim, column, dataset = expected[config['task_id']]
+        if (config.get('task_type'), config.get('feature_count'), config.get('mutation_feature_index'), config.get('dataset')) != ('regression', dim, column, dataset):
+            raise ValueError('REGRESSION_SCHEMA_MISMATCH')
     if config['task_id'] == 'EXT-02' and (config.get('feature_count') != 16 or config.get('dataset') != 'Letter Recognition'):
         raise ValueError('LETTER_SCHEMA_MISMATCH')
     declared = set()
