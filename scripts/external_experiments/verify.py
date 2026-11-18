@@ -20,6 +20,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.experiments import verify_result as reference
+from scripts.external_experiments.common import CLASSIFICATION_DATASETS, CLASSIFICATION_TASKS
 
 METHODS = ('random_group', 'completeness', 'rf_source_conformity_group', 'evidence_rf_group')
 MODELS = ('logistic', 'random_forest')
@@ -297,17 +298,20 @@ def verify(result, config_path, data_dir):
         result = Path(result).resolve(strict=True); data_dir = Path(data_dir).resolve(strict=True); config_path = Path(config_path).resolve(strict=True)
         require(result.is_dir() and data_dir.is_dir(), 'Input roots are not directories')
         cfg = read(config_path)
-        require(cfg['schema'] == 'external-experiment-v1' and cfg['task_id'] in ('EXT-02','EXTERNAL-SMOKE') and cfg['task_type'] == 'classification', 'Config identity')
+        require(cfg['schema'] == 'external-experiment-v1' and cfg['task_id'] in CLASSIFICATION_TASKS and cfg['task_type'] == 'classification', 'Config identity')
         if cfg['task_id'] == 'EXTERNAL-SMOKE':
             require(cfg.get('scope') == 'SYNTHETIC_SMOKE_NON_SCIENTIFIC', 'Synthetic smoke scope')
         require(cfg['seed'] in SEEDS and cfg['budgets'] == list(BUDGETS) and cfg['models'] == list(MODELS), 'Frozen matrix')
-        require(cfg['feature_count'] == 16 and cfg['mutation_feature_index'] == 0, 'Feature protocol')
+        dataset, dimension, allowed = CLASSIFICATION_DATASETS.get(cfg['task_id'], (None, 16, None))
+        require(cfg['feature_count'] == dimension and cfg['mutation_feature_index'] == 0, 'Feature protocol')
+        if dataset is not None:
+            require(cfg['dataset'] == dataset, 'Classification dataset')
         paths, source_path = _inputs(cfg, data_dir)
         data = read(paths[cfg['selection_input']]); dev = read(paths[cfg['development_input']])['records']; test = read(paths[cfg['test_input']])['records']
         refs = read(paths[cfg['audit_reference']])['records']; source = read(source_path)
-        require(data['task']['type'] == 'classification' and data['task']['feature_count'] == 16 and len(refs) == 256, 'Task/reference count')
-        if cfg['task_id'] == 'EXT-02':
-            require(data['task']['allowed_labels'] == [chr(i) for i in range(65,91)], 'Letter class set')
+        require(data['task']['type'] == 'classification' and data['task']['feature_count'] == dimension and len(refs) == 256, 'Task/reference count')
+        if allowed is not None:
+            require(data['task']['allowed_labels'] == list(allowed), 'Classification class set')
         require(isinstance(source['raw_sha256'],str) and reference.HEX.fullmatch(source['raw_sha256']), 'Invalid source digest')
         require(data['asset_metadata']['source_sha256'] == source['raw_sha256'], 'Source data SHA mismatch')
         rows,d0,pool = _separate(data,dev,test)
