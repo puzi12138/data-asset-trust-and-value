@@ -1,6 +1,6 @@
 # Publication boundary
 
-This collaboration extension is a local release candidate. Repository visibility does not grant permission to publish additional research material or select a software license. The maintainer must approve the exact file manifest before the first upload of this extension.
+The community experiment tools are available on the default branch. The table below describes which materials belong in this public engineering repository. Its software licensing decision remains with the rights holder.
 
 | Category | Publication rule |
 | --- | --- |

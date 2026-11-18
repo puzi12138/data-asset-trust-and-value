@@ -19,6 +19,8 @@
 
 使用 Python 3.10（本次验证版本）。建议在独立虚拟环境中安装所需依赖。
 
+在另一台 Windows 电脑接手现有工作，请从[换机接续说明](docs/WINDOWS_HANDOFF.md)开始。里面列出了主分支的无训练自检、外部实验工具所在的 PR，以及四项实验各自可接续的步骤。
+
 ```sh
 python -m venv .venv
 # 激活虚拟环境后运行：
@@ -80,7 +82,7 @@ pnpm build
 
 ## 贡献计算资源
 
-社区实验扩展当前为待公开审批的本地候选。代码许可证、机构及知识产权范围尚待权利人确认；公开仓库可见不代表已经取得这些授权。发布边界见[PUBLICATION_BOUNDARY](docs/PUBLICATION_BOUNDARY.md)。
+社区实验工具已合入主分支。外部分类与回归工具另见 PR #18，具体实验使用对应 Issue 指定的提交。仓库目前暂未添加代码许可证，数据来源及材料公开范围见[发布说明](docs/PUBLICATION_BOUNDARY.md)。
 
 首批任务包括Spambase、Concrete、Wine、Auto MPG、Ionosphere和Airfoil Self-Noise，每项固定三个种子。分类使用Logistic Regression、回归使用Ridge，保留同信息RF等选择对照；回归还包含条件Monte Carlo Data Shapley。任务使用公开评价数据，不宣称隐藏盲测。见[任务矩阵](docs/EXPERIMENT_TASK_MATRIX.md)和[贡献说明](CONTRIBUTING.md)。
 
