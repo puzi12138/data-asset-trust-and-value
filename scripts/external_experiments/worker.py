@@ -1,7 +1,7 @@
 """External classification experiment worker; a monitored GO precedes data and ML.
 
-This worker implements the fixed EXT-02 / Letter Recognition pilot matrix.  It
-uses existing evidence/selection logic but does not alter the historical worker.
+This worker implements the fixed Covertype and Letter Recognition matrices
+using the existing evidence/selection logic.
 All outputs are new files in an exclusive worker directory, never pickle data.
 """
 from pathlib import Path
@@ -18,6 +18,8 @@ import psutil
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT), str(ROOT / 'src')]
+from scripts.external_experiments.common import CLASSIFICATION_DATASETS, CLASSIFICATION_TASKS, validate_config
+
 METHODS = ('random_group', 'completeness', 'rf_source_conformity_group', 'evidence_rf_group')
 
 
@@ -92,14 +94,19 @@ def normalized_probabilities(values):
     return [v / total for v in clipped]
 
 
-def _validate_selection_input(data, reference, seed):
+def _validate_selection_input(data, reference, seed, task_id='EXTERNAL-SMOKE'):
     rows, roles, task = data['rows'], data['roles'], data['task']
     d0, pool = list(roles['D0']), list(roles['pool'])
-    if task.get('type') != 'classification' or task.get('feature_count') != 16:
-        raise ValueError('ONLY_LETTER_CLASSIFICATION_SUPPORTED')
+    if task_id not in CLASSIFICATION_TASKS:
+        raise ValueError('UNSUPPORTED_CLASSIFICATION_TASK')
+    _, dimension, allowed = CLASSIFICATION_DATASETS.get(task_id, (None, 16, None))
+    if task.get('type') != 'classification' or task.get('feature_count') != dimension:
+        raise ValueError('CLASSIFICATION_DIMENSION_MISMATCH')
     labels = task.get('allowed_labels')
     if not isinstance(labels, list) or labels != sorted(set(labels)) or len(labels) < 2:
         raise ValueError('BAD_LABELS')
+    if allowed is not None and labels != list(allowed):
+        raise ValueError('CLASSIFICATION_LABEL_SET_MISMATCH')
     if not d0 or len(pool) < 512 or len(reference) != 256:
         raise ValueError('NOT_RUN_INSUFFICIENT_POOL_OR_REFERENCE')
     if any(not isinstance(i, int) or isinstance(i, bool) or not 0 <= i < len(rows) for i in d0 + pool):
@@ -177,8 +184,6 @@ def run(args):
     from threadpoolctl import threadpool_limits
     from data_asset_poc.assessment import selection as sel
     from data_asset_poc.assessment.value_methods import transform
-    from scripts.external_experiments.common import validate_config
-
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=False)
     write(out / 'AUTH.json', auth)
@@ -188,17 +193,14 @@ def run(args):
     try:
         cfg = read(args.config)
         validate_config(cfg, args.data_dir)
-        if (cfg.get('task_id') not in ('EXT-02', 'EXTERNAL-SMOKE')
-                or cfg.get('task_id') == 'EXTERNAL-SMOKE' and cfg.get('scope') != 'SYNTHETIC_SMOKE_NON_SCIENTIFIC'
-                or cfg.get('budgets') != [128, 512] or cfg.get('models') != ['logistic', 'random_forest']):
+        if cfg['task_id'] not in CLASSIFICATION_TASKS:
             raise ValueError('UNSUPPORTED_TASK_OR_MATRIX')
-        if cfg.get('mutation_feature_index') != 0:
-            raise ValueError('BAD_MUTATION_FEATURE')
         config_hash = sha(args.config)
         t = time.perf_counter()
         data = read(safe(args.data_dir, cfg['selection_input']))
         refs = read(safe(args.data_dir, cfg['audit_reference']))['records']
-        rows, d0, pool, task, evidence, audit = _validate_selection_input(data, refs, cfg['seed'])
+        rows, d0, pool, task, evidence, audit = _validate_selection_input(
+            data, refs, cfg['seed'], cfg['task_id'])
         timing['selection_and_reference_read_validate_seconds'] = time.perf_counter() - t
         write(out / 'AUDIT.json', {'scope': 'same-source version compliance only', 'sample': audit})
         t = time.perf_counter()

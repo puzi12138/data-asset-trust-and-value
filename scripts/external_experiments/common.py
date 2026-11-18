@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[2]
 METHODS = ['random_group', 'completeness', 'rf_source_conformity_group', 'evidence_rf_group']
 SEEDS = {1103, 2207, 3301}
 INPUT_KEYS = ('selection_input', 'audit_reference', 'development_input', 'test_input', 'injection_truth')
+CLASSIFICATION_DATASETS = {
+    'EXT-01': ('Covertype', 54, tuple('1234567')),
+    'EXT-02': ('Letter Recognition', 16, tuple('ABCDEFGHIJKLMNOPQRSTUVWXYZ')),
+}
+CLASSIFICATION_TASKS = {*CLASSIFICATION_DATASETS, 'EXTERNAL-SMOKE'}
 LEGACY_CODE = [
     'scripts/experiments/resources.py', 'scripts/experiments/run_task.py',
     'scripts/experiments/check_env.py', 'scripts/experiments/verify_result.py',
@@ -52,13 +57,14 @@ def safe(root, relative):
 def validate_config(config, data_dir):
     if config.get('schema') != 'external-experiment-v1':
         raise ValueError('UNSUPPORTED_CONFIG_SCHEMA')
-    if config.get('task_id') not in {'EXT-02', 'EXTERNAL-SMOKE', 'EXT-03', 'EXT-04', 'REGRESSION-SMOKE'}:
+    task_id = config.get('task_id')
+    if task_id not in CLASSIFICATION_TASKS | {'EXT-03', 'EXT-04', 'REGRESSION-SMOKE'}:
         raise ValueError('ADAPTER_NOT_IMPLEMENTED')
     if config.get('task_id') == 'EXTERNAL-SMOKE' and config.get('scope') != 'SYNTHETIC_SMOKE_NON_SCIENTIFIC':
         raise ValueError('SMOKE_SCOPE_REQUIRED')
     if config.get('seed') not in SEEDS or isinstance(config.get('seed'), bool):
         raise ValueError('SEED_NOT_FROZEN')
-    classification = config.get('task_id') in {'EXT-02', 'EXTERNAL-SMOKE'}
+    classification = task_id in CLASSIFICATION_TASKS
     if config.get('task_id') == 'REGRESSION-SMOKE' and config.get('scope') != 'SYNTHETIC_SMOKE_NON_SCIENTIFIC':
         raise ValueError('SMOKE_SCOPE_REQUIRED')
     wanted_models = ['logistic', 'random_forest'] if classification else ['ridge', 'random_forest']
@@ -72,8 +78,10 @@ def validate_config(config, data_dir):
         dim, column, dataset = expected[config['task_id']]
         if (config.get('task_type'), config.get('feature_count'), config.get('mutation_feature_index'), config.get('dataset')) != ('regression', dim, column, dataset):
             raise ValueError('REGRESSION_SCHEMA_MISMATCH')
-    if config['task_id'] == 'EXT-02' and (config.get('feature_count') != 16 or config.get('dataset') != 'Letter Recognition'):
-        raise ValueError('LETTER_SCHEMA_MISMATCH')
+    if task_id in CLASSIFICATION_DATASETS:
+        dataset, dimension, _ = CLASSIFICATION_DATASETS[task_id]
+        if (config.get('dataset'), config.get('feature_count')) != (dataset, dimension):
+            raise ValueError(('COVERTYPE' if task_id == 'EXT-01' else 'LETTER') + '_SCHEMA_MISMATCH')
     declared = set()
     if not isinstance(config.get('inputs'), list) or not config['inputs']:
         raise ValueError('MISSING_INPUT_BINDING')
